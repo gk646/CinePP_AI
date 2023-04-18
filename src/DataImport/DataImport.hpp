@@ -11,11 +11,13 @@
 #include <iostream>
 
 namespace Cu {
-    class CSVImport {
+    /** DEPRECATED / realized too late its smarter to just load the data into movie structs
+     * but its an interesting approach*/
+    class CSVImportRAW {
 
     public:
-        CSVImport();
-        ~CSVImport();
+        CSVImportRAW();
+        ~CSVImportRAW();
 
 
         /**Import file with name / relative to /resources folder*/
@@ -24,18 +26,16 @@ namespace Cu {
             vector_csv<ColumnTypes...> result;
             std::ifstream file("resources/" + filename);
             std::string line;
-
             // Read the first line to get column names
             if (std::getline(file, line)) {
                 std::stringstream line_stream(line);
                 std::string column_name;
                 uint_fast8_t index = 0;
-                while (std::getline(line_stream, column_name, ',')) {
+                while (std::getline(line_stream, column_name, ';')) {
                     result.columns[column_name] = index++;
                 }
 
             }
-
             // Process the remaining lines for data parsing
             while (std::getline(file, line)) {
                 std::stringstream line_stream(line);
@@ -57,14 +57,14 @@ namespace Cu {
             std::tuple<ColumnTypes...> parsed_row;
 
             // Read and parse each cell
-            ((std::getline(line_stream, cell_str, ','),
+            ((std::getline(line_stream, cell_str, ';'),
                     parse<ColumnTypes>(cell_str, std::get<ColumnIndices>(parsed_row))), ...);
 
             // Append parsed values to the appropriate columns
             ((std::get<ColumnIndices>(table.data).emplace_back(std::get<ColumnIndices>(parsed_row))), ...);
         }
 
-
+        /**change the datatype of the input data to fit the celltype*/
         template<typename T>
         static void parse(const std::string &cell_str, T &output) {
             try {
@@ -89,12 +89,64 @@ namespace Cu {
                     output = result;
                 }
             } catch (const std::invalid_argument &) {
-                std::cout << cell_str;
+                std::cerr << cell_str + "\n";
                 output = static_cast<T>(0);
             }
 
         }
 
+
+    };
+
+    using namespace std;
+
+    class CSVImport {
+        static vector_movie loadMoviesFromCSV(const string &fileName) {
+            vector_movie result;
+            std::ifstream file("resources/" + fileName);
+            std::string line;
+            if (std::getline(file, line)) {
+                std::stringstream line_stream(line);
+                std::string column_name;
+                uint_fast8_t index = 0;
+                while (std::getline(line_stream, column_name, ';')) {
+                    result.columns[column_name] = index++;
+                }
+
+            }
+            // Process the remaining lines for data parsing
+            while (std::getline(file, line)) {
+                std::stringstream line_stream(line);
+                std::string cell;
+                std::vector<std::string> cells;
+
+                while (std::getline(line_stream, cell, ';')) {
+                    cells.push_back(cell);
+                }
+
+                int_fast32_t movieId = std::stoi(cells[0]);
+                const std::string &title = cells[1];
+                uint_fast16_t year = static_cast<uint_fast16_t>(std::stoi(cells[2]));
+                vector<string> genres = parseGenres(cells[3]);
+
+                Movie movie(movieId, title, year, genres);
+                result.addMovie(movie);
+            }
+
+            return result;
+        }
+
+    private:
+        vector<string> parseGenres(const string &string) {
+            std::vector<std::string> result;
+            std::istringstream iss(string);
+            std::string token;
+
+            while (std::getline(iss, token, '|')) {
+                result.emplace_back(token);
+            }
+            return result;
+        }
     };
 }
 
