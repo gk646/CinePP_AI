@@ -7,6 +7,7 @@
 #pragma  once
 
 #include <string>
+#include <random>
 #include "../Util/DataTypes/DataTypes.hpp"
 #include "../DataImport/DataImport.hpp"
 
@@ -15,14 +16,20 @@ namespace Cu {
 
     class CeeU {
     public:
-        CeeU(string &movieCSV);
-        string getMovieReccommendationByName(string &name);
+        CeeU(const string &movieCSV, const string &ratingCSV);
+        string getBestMovieNameByMovieName(const string &inputMovieName);
 
+        vector_movie movies;
+        vector_rating ratings;
 
     private:
+        int getRandomInt(const int &bounds);
+        int getRandomInt(const int &start, const int &end);
+        std::random_device random_device;
+        std::mt19937 generator;
         CSVImport csvImport{};
         CSVImportRAW csvImportRaw{};
-        vector_movie movies;
+
     };
 }
 #endif //CEEU_AI_CEEU_HPP

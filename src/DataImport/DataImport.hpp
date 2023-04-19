@@ -16,8 +16,9 @@ namespace Cu {
     class CSVImportRAW {
 
     public:
-        CSVImportRAW();
-        ~CSVImportRAW();
+        CSVImportRAW() {};
+
+        ~CSVImportRAW() {};
 
 
         /**Import file with name / relative to /resources folder*/
@@ -101,52 +102,17 @@ namespace Cu {
     using namespace std;
 
     class CSVImport {
-        static vector_movie loadMoviesFromCSV(const string &fileName) {
-            vector_movie result;
-            std::ifstream file("resources/" + fileName);
-            std::string line;
-            if (std::getline(file, line)) {
-                std::stringstream line_stream(line);
-                std::string column_name;
-                uint_fast8_t index = 0;
-                while (std::getline(line_stream, column_name, ';')) {
-                    result.columns[column_name] = index++;
-                }
+    public:
+        CSVImport() {};
 
-            }
-            // Process the remaining lines for data parsing
-            while (std::getline(file, line)) {
-                std::stringstream line_stream(line);
-                std::string cell;
-                std::vector<std::string> cells;
+        ~CSVImport() {};
+        vector_movie loadMoviesFromCSV(const string &fileName);
+        vector_rating loadRatingsFromCSV(const string &fileName);
 
-                while (std::getline(line_stream, cell, ';')) {
-                    cells.push_back(cell);
-                }
-
-                int_fast32_t movieId = std::stoi(cells[0]);
-                const std::string &title = cells[1];
-                uint_fast16_t year = static_cast<uint_fast16_t>(std::stoi(cells[2]));
-                vector<string> genres = parseGenres(cells[3]);
-
-                Movie movie(movieId, title, year, genres);
-                result.addMovie(movie);
-            }
-
-            return result;
-        }
 
     private:
-        vector<string> parseGenres(const string &string) {
-            std::vector<std::string> result;
-            std::istringstream iss(string);
-            std::string token;
+        vector<string> parseGenres(const string &string);
 
-            while (std::getline(iss, token, '|')) {
-                result.emplace_back(token);
-            }
-            return result;
-        }
     };
 }
 
