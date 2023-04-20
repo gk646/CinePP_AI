@@ -18,18 +18,9 @@ int main() {
     *ratings = CSVImportRAW::importCSVByName<uint_fast16_t, uint_fast32_t, float, uint_fast32_t>("ratings.csv");
     *movies = CSVImportRAW::importCSVByName<uint_fast32_t, std::string, uint_fast16_t, std::vector<std::string>>("movies.csv");
 
-    const auto &column = movies->get_column<3>(3);
-    const auto &column2 = movies->get_column<3>(4);
-
-    std::cout << Math::getSimilarityOfStringVectors(column, column2);
     Math::printStoppedTime(start_time);
 
-    std::cout << ceeUApp->movies.getMovieById(111795).title;
-    std::cout << ceeUApp->ratings.getRatingsByUserId(1)[0];
-    Math::printStoppedTime(start_time);
-
-    std::cout << ceeUApp->getBestMovieNameByMovieName("Shawshank Redemption");
-
+    std::cout << ceeUApp->getBestMovieNameByMovieName("Dangerous Minds");
 
     Math::printStoppedTime(start_time);
 

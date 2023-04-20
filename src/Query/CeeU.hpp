@@ -25,7 +25,6 @@ namespace Cu {
     private:
         int getRandomInt(const int &bounds);
         int getRandomInt(const int &start, const int &end);
-        std::random_device random_device;
         std::mt19937 generator;
         CSVImport csvImport{};
         CSVImportRAW csvImportRaw{};
