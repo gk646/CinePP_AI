@@ -1,6 +1,6 @@
 ## CinePP_AI
 
-#### A small movie reccomendation AI project using the https://grouplens.org 100k database  
+#### A small movie reccomendation AI project using the https://grouplens.org/datasets/movielens/ 100k database  
 
 
 
