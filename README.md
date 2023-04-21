@@ -1,7 +1,13 @@
-## CinePP_AI
+# CinePP_AI
 
-#### A small movie reccomendation AI project using the https://grouplens.org/datasets/movielens/ 100k database  
+I did a small python project using tensorflow to make a neural network learn the snake game back at new years.
+However, after learning (and liking!) C++ I wanted to revisit and do it from the ground up.
 
+I am using the https://grouplens.org/datasets/movielens/ 100k database as sample data
+**However I modified the data** with regex to fit my purpose:  
+- changed the delimiter to ";" semicolon (this eliminates the need to parse for "," inside movie titles)
+- separated the year in "movies.csv" into its own column (to use it more efficiently)
+- filled in some data gaps
 
 
 #### Goals:
