@@ -5,10 +5,21 @@
 #include "NeuralBuildBlocks.hpp"
 
 
-double Layer::dot_product(const std::vector<float> &a, const std::vector<float> &b) {
-    float result = 0;
-    for (std::uint_fast8_t i = a.size(); i >= 0; --i) {
-        result += a[i] * b[i];
+Layer::Layer(uint_fast8_t layerSize, NeuronInitState state) : layerSize(layerSize) {
+    switch (state) {
+        case NeuronInitState::ZERO:
+            for (int i = 0; i < layerSize; ++i) {
+                neurons.emplace_back();
+            }
+            break;
+        case NeuronInitState::RANDOM:
+            default_random_engine generator;
+            normal_distribution<float> distribution(0.0, 0.1);
+
+            for (int i = 0; i < layerSize; ++i) {
+                neurons.emplace_back(distribution(generator));
+            }
+            break;
     }
-    return result;
 }
+

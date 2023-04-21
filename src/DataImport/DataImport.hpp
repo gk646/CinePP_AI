@@ -91,12 +91,9 @@ namespace Cu {
                 }
             } catch (const std::invalid_argument &) {
                 std::cerr << cell_str + "\n";
-                output = static_cast<T>(0);
             }
 
         }
-
-
     };
 
     using namespace std;

@@ -8,33 +8,31 @@
 
 #include <vector>
 #include <cstdint>
+#include <random>
 
 
+enum class NeuronInitState {
+    ZERO, RANDOM
+};
 using namespace std;
 
 struct Neuron {
+    Neuron() {};
+
+    Neuron(float bias) : bias(bias) {};
     float bias;
-    float activation;
 };
-
-
 
 
 class Layer {
 public:
-    Layer(int size) {
-        for (int i = 0; i < size; ++i) {
-            neurons.push_back(Neuron{});
-        }
-    }
+    Layer(uint_fast8_t size, NeuronInitState state);
 
-    double relu(double x) { return std::max(0.0, x); }
+    uint_fast8_t size() { return layerSize; }
 
-    double dot_product(const std::vector<float>& a, const std::vector<float>& b);
+    uint_fast8_t layerSize;
     vector<Neuron> neurons;
 };
-
-
 
 
 #endif //CEEU_AI_NEURALBUILDBLOCKS_HPP

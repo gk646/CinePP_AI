@@ -10,7 +10,9 @@
 namespace Cu {
     using namespace std;
 
-    CeeU::CeeU(const string &movieCSV, const string &ratingCSV): generator(std::random_device{}()) {
+    CeeU::CeeU(const string &movieCSV, const string &ratingCSV, const NetworkInitializer &netInit) :
+            generator(std::random_device{}()), neuralNetwork(NeuralNetwork{netInit.layerSizes, netInit.initState}) {
+
         movies = csvImport.loadMoviesFromCSV(movieCSV);
         ratings = csvImport.loadRatingsFromCSV(ratingCSV);
     }
@@ -43,7 +45,7 @@ namespace Cu {
             if (movie_ratings.count(rating.movieId)) {
                 float old_average = movie_ratings[rating.movieId].first;
                 int new_count = ++movie_ratings[rating.movieId].second;
-                movie_ratings[rating.movieId] = { old_average + (rating.rating - old_average) / new_count, new_count};
+                movie_ratings[rating.movieId] = {old_average + (rating.rating - old_average) / new_count, new_count};
             }
         }
 
