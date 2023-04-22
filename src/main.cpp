@@ -10,8 +10,8 @@ using namespace Cu;
 int main() {
     std::chrono::high_resolution_clock::time_point start_time = std::chrono::high_resolution_clock::now();
 
-    NetworkInitializer netInit{{5, 5, 5, 5}, NeuronInitState::RANDOM};
-    NeuralNetwork neuralNetwork{netInit.layerSizes, netInit.initState};
+    NetworkInitializer netInit{{3, 3, 3, 3}, NeuronInitState::RANDOM, ActivationFunction::SIGMOID};
+    NeuralNetwork neuralNetwork{netInit.layerSizes, netInit.initState, ActivationFunction::SIGMOID};
     CeeU *ceeUApp = new CeeU("movies.csv", "ratings.csv", netInit);
 
     auto tags = new vector_csv<uint_fast16_t, uint_fast32_t, std::string, uint_fast32_t>();
@@ -27,9 +27,39 @@ int main() {
 
     Math::printStoppedTime(start_time);
 
-    for (auto &num: neuralNetwork.forward_pass({1, 2, 3, 4, 5})) {
-        cout << num<<"|";
+    for (auto &num: neuralNetwork.getOutput({1, 1, 1})) {
+        cout << num << "|";
     }
+    vector<vector<float>> input = {{1, 1, 0},
+                                   {1, 0, 0},
+                                   {0, 1, 1},
+                                   {1, 0, 0},
+                                   {0, 1, 0},
+                                   {1, 1, 0},
+                                   {1, 0, 0},
+                                   {0, 1, 1},
+                                   {1, 0, 0},
+                                   {0, 1, 0}};
+    vector<vector<float>> targetOutput = {{0, 1, 0},
+                                          {0, 1, 0},
+                                          {0, 0, 0},
+                                          {0, 1, 0},
+                                          {0, 0, 0},
+                                          {0, 1, 0},
+                                          {0, 1, 0},
+                                          {0, 0, 0},
+                                          {0, 1, 0},
+                                          {0, 0, 0}};
+
+    for (int i = 0; i < 100; ++i) {
+        neuralNetwork.backpropagation(input, targetOutput, 0.3, 100);
+
+        cout << "\n";
+        for (auto &num: neuralNetwork.getOutput({1, 1, 1})) {
+            cout << num << "|";
+        }
+    }
+
 
     Math::printStoppedTime(start_time);
 

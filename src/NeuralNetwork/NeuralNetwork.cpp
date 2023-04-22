@@ -17,8 +17,10 @@ typedef uint_fast32_t u32bit;
 
 #include <random>
 #include <stdexcept>
+#include <iostream>
 
-NeuralNetwork::NeuralNetwork(vector<uint_fast8_t> layer_sizes, NeuronInitState initState) {
+NeuralNetwork::NeuralNetwork(vector<uint_fast8_t> layer_sizes, NeuronInitState initState, ActivationFunction activationType) : activationType(
+        activationType) {
     default_random_engine generator;
     normal_distribution<float> distribution(0.0, 0.1);
 
@@ -47,9 +49,24 @@ float NeuralNetwork::dot_product(const vector<float> &a, const vector<vector<flo
     }
     return result;
 }
+double NeuralNetwork::activationFunction(double x) {
+    switch (activationType) {
+        case ActivationFunction::RELU:
+            return relu(x);
+        case ActivationFunction::SIGMOID:
+            return sigmoid(x);
+    }
+}
+double NeuralNetwork::activationFunction_derivative(double x) {
+    switch (activationType) {
+        case ActivationFunction::RELU:
+            return relu_derivative(x);
+        case ActivationFunction::SIGMOID:
+            return sigmoid_derivative(x);
+    }
+}
 
-
-vector<float> NeuralNetwork::forward_pass(const vector<float> &input) {
+vector<float> NeuralNetwork::getOutput(const vector<float> &input) {
     // Validate input size
     if (input.size() != layers[0].size()) {
         throw std::runtime_error("Input size mismatch.");
@@ -70,34 +87,87 @@ vector<float> NeuralNetwork::forward_pass(const vector<float> &input) {
     return layer_input;
 }
 
-vector<float> NeuralNetwork::forward(const vector<float> &input) {
+vector<vector<float>> NeuralNetwork::forward(const vector<float> &input) {
     // Validate input size
     if (input.size() != layers[0].size()) {
         throw std::runtime_error("Input size mismatch.");
     }
-
+    vector<vector<float>> activations;
     vector<float> layer_input = input;
 
-    // Forward pass through the network
-    for (size_t i = 0; i < weight_matrix.size(); ++i) {
-        vector<float> layer_output(layers[i + 1].size(), 0.0);
+    for (int i = 0; i < layers.size(); ++i) {
+        vector<float> layer_output;
 
-        for (size_t j = 0; j < weight_matrix[i].size(); ++j) {
-            for (size_t k = 0; k < weight_matrix[i][j].size(); ++k) {
-                layer_output[k] += layer_input[j] * weight_matrix[i][j][k];
-            }
+        for (Neuron &neuron: layers[i].neurons) {
+            float weighted_sum = dot_product(layer_input, weight_matrix[i]) + neuron.bias;
+            layer_output.push_back(activationFunction(weighted_sum));
         }
-
-        // Add biases and apply activation function
-        for (size_t j = 0; j < layer_output.size(); ++j) {
-            //layer_output[j] += bias_matrix[i][j];
-            //layer_output[j] = activationFunction(layer_output[j]);
-        }
-
         layer_input = layer_output;
+        activations.push_back(layer_input);
     }
 
-    return layer_input;
+    return activations;
 }
+
+
+void NeuralNetwork::backpropagation(const vector<vector<float>> &inputList, const vector<vector<float>> &outputList, double learnRate,
+                                    int repeatsPerBatch) {
+
+    for (int i = 0; i < repeatsPerBatch; ++i) {
+
+        for (u8bit inputListIterator = 0; inputListIterator < inputList.size(); inputListIterator++) {
+            auto &inputVec = inputList[inputListIterator];
+
+
+            vector<vector<float>> activations = forward(inputVec);
+            vector<float> output = activations.back(); // Get the final output
+            vector<float> error{};
+
+            for (u8bit j = 0; j < output.size(); j++) {
+                error.push_back(output[j] - outputList.at(inputListIterator).at(j));
+            }
+
+            // Iterate over the layers in reverse order
+            for (int layerIndex = layers.size() - 1; layerIndex >= 0; layerIndex--) {
+                Layer &currentLayer = layers[layerIndex];
+
+                // Calculate the gradient for each neuron in the layer
+                for (int neuronIndex = 0; neuronIndex < currentLayer.neurons.size(); neuronIndex++) {
+                    Neuron &neuron = currentLayer.neurons[neuronIndex];
+
+                    // Compute the gradient of the loss function with respect to neuron's output
+
+                    double outputGradient = 2 * error[neuronIndex] * activationFunction_derivative(activations[layerIndex][neuronIndex]);
+
+                    // Update the weights and biases of the neuron
+                    for (int weightIndex = 0; weightIndex < weight_matrix[layerIndex][neuronIndex].size(); weightIndex++) {
+                        double inputForWeight = (layerIndex == 0) ? inputVec[weightIndex] : activations[layerIndex - 1][weightIndex];
+
+                        // Compute the gradient of the loss function with respect to the weight
+                        double weightGradient = outputGradient * inputForWeight;
+
+                        // Update the weight using the computed gradient and learning rate
+                        weight_matrix[layerIndex][neuronIndex][weightIndex] -= learnRate * weightGradient;
+                    }
+
+                    // Update the bias using the computed gradient and learning rate
+                    neuron.bias -= learnRate * outputGradient;
+                }
+
+                // Update the error for the next layer
+                if (layerIndex > 0) {
+                    vector<float> new_error(currentLayer.neurons.size(), 0.0);
+                    for (int neuronIndex = 0; neuronIndex < currentLayer.neurons.size(); neuronIndex++) {
+                        for (int nextNeuronIndex = 0; nextNeuronIndex < layers[layerIndex - 1].neurons.size(); nextNeuronIndex++) {
+                            new_error[nextNeuronIndex] += error[neuronIndex] * weight_matrix[layerIndex - 1][nextNeuronIndex][neuronIndex];
+                        }
+                    }
+                    error = new_error;
+                }
+            }
+        }
+    }
+}
+
 
 

@@ -11,7 +11,7 @@ namespace Cu {
     using namespace std;
 
     CeeU::CeeU(const string &movieCSV, const string &ratingCSV, const NetworkInitializer &netInit) :
-            generator(std::random_device{}()), neuralNetwork(NeuralNetwork{netInit.layerSizes, netInit.initState}) {
+            generator(std::random_device{}()), neuralNetwork(NeuralNetwork{netInit.layerSizes, netInit.initState, netInit.activationType}) {
 
         movies = csvImport.loadMoviesFromCSV(movieCSV);
         ratings = csvImport.loadRatingsFromCSV(ratingCSV);
