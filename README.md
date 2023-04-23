@@ -1,10 +1,8 @@
 # CinePP_AI
 
-I did a small python project using tensorflow to make a neural network learn the snake game back at new years.
-However, after learning (and liking!) C++ I wanted to revisit and do it from the ground up.
+CinePP_AI is a C++ based project where i try to apply machine learning to the [MovieLens 100k database](https://grouplens.org/datasets/movielens/). I try to code them from scratch to get a deeper understanding of the algorithms used.
 
-I am using the https://grouplens.org/datasets/movielens/ 100k database as sample data
-**However I modified the data** with regex to fit my purpose:  
+**I modified orignal data** with regex to fit my purpose:  
 - changed the delimiter to ";" semicolon (this eliminates the need to parse for "," inside movie titles)
 - separated the year in "movies.csv" into its own column (to use it more efficiently)
 - filled in some data gaps
